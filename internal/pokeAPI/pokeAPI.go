@@ -1,7 +1,8 @@
-package internal
+package pokeAPI
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -34,7 +35,18 @@ func CreatePokeAPIRequest(url, command string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	if command == "map" {
+		results, err := handleMapCommand(body)
+		if err != nil {
+			return nil, err
+		}
+		return results, nil
+	}
 
+	return nil, errors.New("http command not found.")
+}
+
+func handleMapCommand(body []byte) ([]string, error) {
 	results := []string{}
 
 	var locations GetLocations
