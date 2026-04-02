@@ -1,16 +1,25 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/AggroSec/Go-Pokedex/internal/pokeAPI"
 )
 
-const (
-	locationURL = "https://pokeapi.co/api/v2/location-area/"
-)
+type GetLocations struct {
+	Count    int               `json:"count"`
+	Next     *string           `json:"next"`
+	Previous *string           `json:"previous"`
+	Results  []LocationResults `json:"results"`
+}
 
-func commandMap(conf *Config) error {
+type LocationResults struct {
+	Name *string `json:"name"`
+	URL  *string `json:"url"`
+}
+
+func commandMap(conf *Config, param string) error {
 	var getURL string
 	if conf.Next != nil {
 		getURL = *conf.Next
@@ -18,26 +27,32 @@ func commandMap(conf *Config) error {
 		getURL = locationURL
 	}
 
-	locationResults, err := pokeAPI.CreatePokeAPIRequest(getURL, "map")
+	data, err := pokeAPI.CreatePokeAPIRequest(getURL, conf.PokeCache)
 	if err != nil {
 		return err
 	}
 
-	if locationResults[0] != "null" {
-		conf.Next = &locationResults[0]
-	}
-	if locationResults[1] != "null" {
-		conf.Previous = &locationResults[1]
+	var results GetLocations
+	err = json.Unmarshal(data, &results)
+	if err != nil {
+		return err
 	}
 
-	for _, location := range locationResults[2:] {
-		fmt.Println(location)
+	if results.Next != nil {
+		conf.Next = results.Next
+	}
+	if results.Previous != nil {
+		conf.Previous = results.Previous
+	}
+
+	for _, location := range results.Results {
+		fmt.Printf(" - %s\n", *location.Name)
 	}
 
 	return nil
 }
 
-func commandMapb(conf *Config) error {
+func commandMapb(conf *Config, param string) error {
 	var getURL string
 	if conf.Previous != nil {
 		getURL = *conf.Previous
@@ -45,20 +60,26 @@ func commandMapb(conf *Config) error {
 		getURL = locationURL
 	}
 
-	locationResults, err := pokeAPI.CreatePokeAPIRequest(getURL, "map")
+	data, err := pokeAPI.CreatePokeAPIRequest(getURL, conf.PokeCache)
 	if err != nil {
 		return err
 	}
 
-	if locationResults[0] != "null" {
-		conf.Next = &locationResults[0]
-	}
-	if locationResults[1] != "null" {
-		conf.Previous = &locationResults[1]
+	var results GetLocations
+	err = json.Unmarshal(data, &results)
+	if err != nil {
+		return err
 	}
 
-	for _, location := range locationResults[2:] {
-		fmt.Println(location)
+	if results.Next != nil {
+		conf.Next = results.Next
+	}
+	if results.Previous != nil {
+		conf.Previous = results.Previous
+	}
+
+	for _, location := range results.Results {
+		fmt.Printf(" - %s\n", *location.Name)
 	}
 
 	return nil
