@@ -11,7 +11,7 @@ func commandPokedex(conf *Config, param string) error {
 	}
 
 	fmt.Println("Your Pokedex:")
-	for name := range conf.pokedex {
+	for name, _ := range conf.pokedex {
 		fmt.Printf(" - %s\n", name)
 	}
 
